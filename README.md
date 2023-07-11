@@ -6,7 +6,7 @@ Fetches MD files from the Private Contest Repo
 
 VERY LIKELY YOU WILL LEAK STUFF!!!
 
-# Usage
+## Usage
 
 Change settings in `.env`
 
@@ -17,3 +17,9 @@ MAX_PER_BATCH=50 ## Tested with 50 is fine, use 20 if you have issues
 ```
 
 It will create a folder which matches the `REPO_URL` with all QA and Gas reports
+
+## How to get Personal Token
+
+Follow instructions here:
+
+https://github.com/settings/tokens
