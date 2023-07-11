@@ -1,25 +1,66 @@
-import { Product, Cart, ProductInCart } from "./types";
+import axios from "axios";
+import { replaceToFile } from "./file";
 
-/**
- * Given a product, return it's price
- * @param product
- */
-export const getPrice = (product: Product): number => product.price;
+require("dotenv").config(); // NOTE: If you turn this into a package this will break stuff
 
-/**
- * Given a product in a cart, return it's quantity
- * @param product
- */
-export const getQuantity = (product: ProductInCart): number => product.quantity;
+const { GH_KEY } = process.env;
+console.log("");
 
-/**
- * Given a cart, return the total cost of the products it contains
- * @param cart
- */
-export const getTotal = (cart: Cart): number => {
-  return cart.reduce(
-    (accumulator, product) =>
-      accumulator + getPrice(product) * getQuantity(product),
-    0
-  );
+const API_URL = `https://api.github.com/repos/`;
+
+const REPO_URL = `code-423n4/2023-05-chainlink-findings`;
+
+const config = {
+  headers: {
+    Authorization: `Bearer ${GH_KEY}`,
+    Accept: "application/vnd.github+json",
+  },
 };
+
+const MAX_PER_BATCH = 20; // TODO: Check API Rate Limits
+
+interface GithubResult {
+  name: string;
+  download_url: string;
+}
+
+async function getOneFileAndSaveIt(url, name, prefix) {
+  const dataRes = await axios.get(url, {
+    ...config,
+    responseType: "blob",
+  });
+
+  console.log("dataRes", dataRes);
+
+  // Create Folder
+  replaceToFile(dataRes.data, prefix, name);
+}
+
+async function getInfo() {
+  // Get all files
+  const allFilesRes = await axios.get(
+    `${API_URL}${REPO_URL}/contents/data`,
+    config
+  );
+
+  const results: GithubResult[] = allFilesRes.data as GithubResult[];
+
+  // Ignore JSON files
+  const filteredResults = results.filter(
+    (entry) => !entry.name.includes(".json")
+  );
+
+  console.log("filteredResults", filteredResults);
+
+  for (let i = 0; i < filteredResults.length; i += MAX_PER_BATCH) {
+    const shortened = filteredResults.slice(i, i + MAX_PER_BATCH);
+
+    await Promise.all(
+      shortened.map(async (result) =>
+        getOneFileAndSaveIt(result.download_url, result.name, REPO_URL)
+      )
+    );
+  }
+}
+
+getInfo();

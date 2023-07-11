@@ -1,3 +1,5 @@
 /node_modules
 /lib
 /docs
+.env
+/code-423n4

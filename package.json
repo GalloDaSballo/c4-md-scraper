@@ -19,6 +19,10 @@
     "doc": "tsc && jsdoc -c ./.jsdoc.json"
   },
   "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.1",
+    "ts-dotenv": "^0.9.1",
     "ts-node": "^10.9.1"
   },
   "devDependencies": {
