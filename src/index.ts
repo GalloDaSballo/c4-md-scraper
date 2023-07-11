@@ -3,12 +3,10 @@ import { replaceToFile } from "./file";
 
 require("dotenv").config(); // NOTE: If you turn this into a package this will break stuff
 
-const { GH_KEY } = process.env;
+const { GH_KEY, REPO_URL, MAX_PER_BATCH } = process.env;
 console.log("");
 
 const API_URL = `https://api.github.com/repos/`;
-
-const REPO_URL = `code-423n4/2023-05-chainlink-findings`;
 
 const config = {
   headers: {
@@ -16,8 +14,6 @@ const config = {
     Accept: "application/vnd.github+json",
   },
 };
-
-const MAX_PER_BATCH = 20; // TODO: Check API Rate Limits
 
 interface GithubResult {
   name: string;
@@ -52,8 +48,10 @@ async function getInfo() {
 
   console.log("filteredResults", filteredResults);
 
-  for (let i = 0; i < filteredResults.length; i += MAX_PER_BATCH) {
-    const shortened = filteredResults.slice(i, i + MAX_PER_BATCH);
+  const incrementor = Number(MAX_PER_BATCH);
+
+  for (let i = 0; i < filteredResults.length; i += incrementor) {
+    const shortened = filteredResults.slice(i, i + incrementor);
 
     await Promise.all(
       shortened.map(async (result) =>
